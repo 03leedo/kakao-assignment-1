@@ -4,6 +4,7 @@ const todoList = document.querySelector("#todoList");
 const message = document.querySelector("#message");
 const filterButtons = document.querySelectorAll(".filter-button");
 const selectedDateText = document.querySelector("#selectedDateText");
+const weekRangeText = document.querySelector("#weekRangeText");
 const weekView = document.querySelector("#weekView");
 const prevWeekButton = document.querySelector("#prevWeekButton");
 const nextWeekButton = document.querySelector("#nextWeekButton");
@@ -166,6 +167,21 @@ function updateSelectedDateText() {
   selectedDateText.textContent = formatDateLabel(selectedDate);
 }
 
+// 주간 범위(예: 2026-04-27 ~ 2026-05-03)를 네비게이터에 표시합니다.
+function updateWeekRangeText() {
+  const weekDateKeys = getWeekDateKeys();
+  const firstDate = createDateFromKey(weekDateKeys[0]);
+  const lastDate = createDateFromKey(weekDateKeys[6]);
+
+  function formatShort(date) {
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${date.getFullYear()}-${month}-${day}`;
+  }
+
+  weekRangeText.textContent = `${formatShort(firstDate)} ~ ${formatShort(lastDate)}`;
+}
+
 // 선택된 날짜와 현재 필터에 맞는 Todo만 반환합니다.
 function getFilteredTodos() {
   const selectedDateTodos = todos.filter(function (todo) {
@@ -215,6 +231,7 @@ function createActionButton(text, extraClassName, clickHandler) {
 function renderTodos() {
   todoList.innerHTML = "";
   updateSelectedDateText();
+  updateWeekRangeText();
   renderWeekView();
 
   const filteredTodos = getFilteredTodos();
