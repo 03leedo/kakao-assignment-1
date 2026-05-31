@@ -1,0 +1,333 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  color: #202124;
+  background: #f6f4fb;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.todo-app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px 16px;
+}
+
+.todo-panel {
+  width: min(100%, 560px);
+  padding: 32px;
+  background: #ffffff;
+  border: 1px solid #ebe7f5;
+  border-radius: 8px;
+  box-shadow: 0 16px 40px rgba(40, 30, 70, 0.08);
+}
+
+.app-header {
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #672be0;
+}
+
+h1 {
+  margin: 0;
+  font-size: 32px;
+  text-align: center;
+}
+
+.date-navigator {
+  display: grid;
+  grid-template-columns: 82px 1fr 82px;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-button {
+  height: 36px;
+  color: #672be0;
+  background: #f4f1fa;
+  border: 1px solid #ded7ec;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.date-button:hover {
+  color: #ffffff;
+  background: #672be0;
+  border-color: #672be0;
+}
+
+.week-view {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.week-day-button {
+  min-width: 0;
+  min-height: 72px;
+  padding: 8px 4px;
+  color: #4c4659;
+  background: #ffffff;
+  border: 1px solid #ebe7f5;
+  border-radius: 6px;
+}
+
+.week-day-button:hover {
+  color: #672be0;
+  border-color: #672be0;
+}
+
+.week-day-button.selected {
+  color: #ffffff;
+  background: #672be0;
+  border-color: #672be0;
+}
+
+.week-day-button.today {
+  border-color: #672be0;
+  box-shadow: 0 0 0 3px rgba(103, 43, 224, 0.14);
+}
+
+.week-day-button.selected.today {
+  box-shadow: 0 8px 18px rgba(103, 43, 224, 0.22);
+}
+
+.week-day-name,
+.week-day-number,
+.week-day-count {
+  display: block;
+}
+
+.week-day-name {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.week-day-number {
+  margin-top: 4px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.week-day-count {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #8a8495;
+}
+
+.week-day-button.selected .week-day-count {
+  color: #ffffff;
+}
+
+.description {
+  margin: 10px 0 0;
+  color: #68636f;
+  line-height: 1.5;
+}
+
+.todo-form {
+  display: flex;
+  gap: 10px;
+}
+
+.todo-input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid #d8d2e6;
+  border-radius: 6px;
+  outline: none;
+}
+
+.todo-input:focus {
+  border-color: #672be0;
+  box-shadow: 0 0 0 3px rgba(103, 43, 224, 0.14);
+}
+
+.add-button {
+  height: 48px;
+  padding: 0 18px;
+  color: #ffffff;
+  background: #672be0;
+  border: 0;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.add-button:hover {
+  background: #5420bc;
+}
+
+.message {
+  min-height: 22px;
+  margin: 12px 0 8px;
+  color: #d83a3a;
+  font-size: 14px;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 4px;
+  margin: 0 0 16px;
+  background: #f4f1fa;
+  border: 1px solid #ebe7f5;
+  border-radius: 8px;
+}
+
+.filter-button {
+  flex: 1;
+  height: 38px;
+  color: #68636f;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.filter-button:hover {
+  color: #672be0;
+}
+
+.filter-button.active {
+  color: #ffffff;
+  background: #672be0;
+  box-shadow: 0 6px 14px rgba(103, 43, 224, 0.2);
+}
+
+.todo-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #ebe7f5;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.todo-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.todo-item.completed .todo-text {
+  color: #8a8495;
+  text-decoration: line-through;
+}
+
+.todo-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.action-button {
+  min-width: 52px;
+  height: 34px;
+  padding: 0 10px;
+  color: #4c4659;
+  background: #f4f1fa;
+  border: 1px solid #ded7ec;
+  border-radius: 6px;
+}
+
+.action-button:hover {
+  color: #672be0;
+  border-color: #672be0;
+}
+
+.delete-button:hover {
+  color: #d83a3a;
+  border-color: #d83a3a;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 520px) {
+  .todo-panel {
+    padding: 24px;
+  }
+
+  .todo-form,
+  .todo-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .date-navigator {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .date-navigator h1 {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    font-size: 26px;
+  }
+
+  .week-view {
+    grid-template-columns: repeat(7, minmax(54px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .week-day-button {
+    min-width: 54px;
+  }
+
+  #prevWeekButton {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  #nextWeekButton {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .add-button {
+    width: 100%;
+  }
+
+  .todo-actions {
+    justify-content: flex-end;
+  }
+}
