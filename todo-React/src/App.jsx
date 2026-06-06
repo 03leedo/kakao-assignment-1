@@ -4,41 +4,16 @@ import FilterTabs from "./components/FilterTabs";
 import TodoForm from "./components/TodoForm";
 import TodoList from "./components/TodoList";
 import WeekCalendar from "./components/WeekCalendar";
+import useTodos from "./hooks/useTodos";
 import {
   addDaysToDateKey,
   getMondayDateKey,
   getTodayDateKey,
-  isValidDateKey,
 } from "./utils/date";
-import { loadDateKey, loadJson, saveDateKey, saveJson } from "./utils/storage";
+import { loadDateKey, saveDateKey } from "./utils/storage";
 
-const TODO_STORAGE_KEY = "react-todos";
 const SELECTED_DATE_STORAGE_KEY = "react-selected-date";
 const WEEK_START_DATE_STORAGE_KEY = "react-week-start-date";
-
-function createTodoId() {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function normalizeTodo(todo) {
-  return {
-    id: String(todo.id),
-    text: String(todo.text ?? ""),
-    date: todo.date,
-    isCompleted: Boolean(todo.isCompleted),
-    isEditing: false,
-  };
-}
-
-function loadInitialTodos() {
-  return loadJson(TODO_STORAGE_KEY, [], Array.isArray)
-    .filter((todo) => todo && todo.id && todo.text && isValidDateKey(todo.date))
-    .map(normalizeTodo);
-}
 
 function loadInitialSelectedDate() {
   return loadDateKey(SELECTED_DATE_STORAGE_KEY, getTodayDateKey());
@@ -48,19 +23,32 @@ function loadInitialWeekStartDate(selectedDate) {
   return loadDateKey(WEEK_START_DATE_STORAGE_KEY, getMondayDateKey(selectedDate));
 }
 
+function loadInitialDateState() {
+  const selectedDate = loadInitialSelectedDate();
+
+  return {
+    selectedDate,
+    weekStartDate: loadInitialWeekStartDate(selectedDate),
+  };
+}
+
 function App() {
-  const [todos, setTodos] = useState(loadInitialTodos);
+  const {
+    todos,
+    editingId,
+    addTodo,
+    deleteTodo,
+    toggleTodo,
+    updateTodo,
+    startEditTodo,
+    cancelEditTodo,
+  } = useTodos();
+
   const [todoText, setTodoText] = useState("");
   const [message, setMessage] = useState("");
   const [currentFilter, setCurrentFilter] = useState("all");
-  const [selectedDate, setSelectedDate] = useState(loadInitialSelectedDate);
-  const [weekStartDate, setWeekStartDate] = useState(() =>
-    loadInitialWeekStartDate(loadInitialSelectedDate()),
-  );
-
-  useEffect(() => {
-    saveJson(TODO_STORAGE_KEY, todos);
-  }, [todos]);
+  const [{ selectedDate, weekStartDate }, setDateState] =
+    useState(loadInitialDateState);
 
   useEffect(() => {
     saveDateKey(SELECTED_DATE_STORAGE_KEY, selectedDate);
@@ -88,8 +76,10 @@ function App() {
   }, [currentFilter, selectedDateTodos]);
 
   function syncSelectedDate(nextDateKey) {
-    setSelectedDate(nextDateKey);
-    setWeekStartDate(getMondayDateKey(nextDateKey));
+    setDateState({
+      selectedDate: nextDateKey,
+      weekStartDate: getMondayDateKey(nextDateKey),
+    });
   }
 
   function handleAddTodo(event) {
@@ -102,28 +92,15 @@ function App() {
       return;
     }
 
-    const newTodo = {
-      id: createTodoId(),
-      text: trimmedText,
-      date: selectedDate,
-      isCompleted: false,
-      isEditing: false,
-    };
-
-    setTodos((currentTodos) => [...currentTodos, newTodo]);
+    addTodo(trimmedText, selectedDate);
     setTodoText("");
     setMessage("");
   }
 
-  function handleMoveDate(dayAmount) {
+  function moveSelectedDate(dayAmount) {
     const nextDateKey = addDaysToDateKey(selectedDate, dayAmount);
-    syncSelectedDate(nextDateKey);
-    setMessage("");
-  }
 
-  function handleMoveWeek(dayAmount) {
-    const nextSelectedDate = addDaysToDateKey(selectedDate, dayAmount);
-    syncSelectedDate(nextSelectedDate);
+    syncSelectedDate(nextDateKey);
     setMessage("");
   }
 
@@ -138,21 +115,12 @@ function App() {
   }
 
   function handleStartEdit(todoId) {
-    setTodos((currentTodos) =>
-      currentTodos.map((todo) => ({
-        ...todo,
-        isEditing: todo.id === todoId,
-      })),
-    );
+    startEditTodo(todoId);
     setMessage("");
   }
 
-  function handleCancelEdit(todoId) {
-    setTodos((currentTodos) =>
-      currentTodos.map((todo) =>
-        todo.id === todoId ? { ...todo, isEditing: false } : todo,
-      ),
-    );
+  function handleCancelEdit() {
+    cancelEditTodo();
     setMessage("");
   }
 
@@ -164,29 +132,17 @@ function App() {
       return;
     }
 
-    setTodos((currentTodos) =>
-      currentTodos.map((todo) =>
-        todo.id === todoId
-          ? { ...todo, text: trimmedText, isEditing: false }
-          : todo,
-      ),
-    );
+    updateTodo(todoId, trimmedText);
     setMessage("");
   }
 
   function handleToggleTodo(todoId) {
-    setTodos((currentTodos) =>
-      currentTodos.map((todo) =>
-        todo.id === todoId
-          ? { ...todo, isCompleted: !todo.isCompleted }
-          : todo,
-      ),
-    );
+    toggleTodo(todoId);
     setMessage("");
   }
 
   function handleDeleteTodo(todoId) {
-    setTodos((currentTodos) => currentTodos.filter((todo) => todo.id !== todoId));
+    deleteTodo(todoId);
     setMessage("");
   }
 
@@ -203,14 +159,14 @@ function App() {
             todos={todos}
             selectedDate={selectedDate}
             weekStartDate={weekStartDate}
-            onMoveWeek={handleMoveWeek}
+            onMoveWeek={moveSelectedDate}
             onSelectDate={handleSelectDate}
           />
 
           <DayHeader
             selectedDate={selectedDate}
             todoCount={selectedDateTodos.length}
-            onMoveDate={handleMoveDate}
+            onMoveDate={moveSelectedDate}
           />
         </header>
 
@@ -231,6 +187,7 @@ function App() {
             currentFilter={currentFilter}
             selectedDate={selectedDate}
             todos={filteredTodos}
+            editingId={editingId}
             onCancelEdit={handleCancelEdit}
             onDeleteTodo={handleDeleteTodo}
             onSaveEdit={handleSaveEdit}

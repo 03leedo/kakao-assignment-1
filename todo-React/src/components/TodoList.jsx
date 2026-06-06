@@ -5,6 +5,7 @@ function TodoList({
   currentFilter,
   selectedDate,
   todos,
+  editingId,
   onCancelEdit,
   onDeleteTodo,
   onSaveEdit,
@@ -21,6 +22,7 @@ function TodoList({
         <TodoItem
           key={todo.id}
           todo={todo}
+          isEditing={todo.id === editingId}
           onCancelEdit={onCancelEdit}
           onDeleteTodo={onDeleteTodo}
           onSaveEdit={onSaveEdit}

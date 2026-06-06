@@ -43,13 +43,14 @@ function TodoEditForm({ todo, onCancelEdit, onSaveEdit }) {
 
 function TodoItem({
   todo,
+  isEditing,
   onCancelEdit,
   onDeleteTodo,
   onSaveEdit,
   onStartEdit,
   onToggleTodo,
 }) {
-  if (todo.isEditing) {
+  if (isEditing) {
     return (
       <TodoEditForm
         todo={todo}
