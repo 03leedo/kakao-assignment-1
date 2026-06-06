@@ -27,6 +27,7 @@ npm run dev
 ## 1차 과제와 달라진 점
 
 - Vanilla JS의 직접 DOM 조작을 React의 `useState` 기반 렌더링으로 변경했습니다.
+- Todo 목록 렌더링을 컴포넌트 단위로 분리하여 UI를 구성했다.
 - `prompt()`로 처리하던 수정 기능을 `isEditing` 상태 기반 인라인 입력 UI로 변경했습니다.
 - 추가, 수정, 삭제 함수마다 직접 저장하던 localStorage 로직을 `useEffect`로 분리했습니다.
 - 날짜 계산과 저장 로직은 `src/utils/`로 분리해 컴포넌트가 UI 역할에 집중하도록 구성했습니다.
@@ -38,6 +39,8 @@ todo-React/
 ├── src/
 │   ├── components/
 │   ├── utils/
+│   ├── hooks/
+│   │   └── useTodos.js
 │   ├── App.jsx
 │   ├── index.css
 │   └── main.jsx
