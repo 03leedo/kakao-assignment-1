@@ -59,6 +59,8 @@ function TodoItem({
       />
     );
   }
+  // 버튼 스타일 통일을 위한 클래스 변수
+  const btnBase = "h-9 rounded-md border border-[#ded7ec] bg-[#f4f1fa] px-3 text-sm font-bold text-[#4c4659] transition";
 
   return (
     <li
@@ -67,7 +69,7 @@ function TodoItem({
       }`}
     >
       <span
-        className={`min-w-0 flex-1 [overflow-wrap:anywhere] ${
+        className={`min-w-0 flex-1 wrap-anywhere ${
           todo.isCompleted ? "text-[#8a8495] line-through" : "text-[#202124]"
         }`}
       >
@@ -76,26 +78,28 @@ function TodoItem({
 
       <div className="grid grid-cols-3 gap-2 sm:flex">
         <button
-          type="button"
-          className="h-9 rounded-md border border-[#ded7ec] bg-[#f4f1fa] px-3 text-sm font-bold text-[#4c4659] transition hover:border-[#672be0] hover:text-[#672be0]"
-          onClick={() => onStartEdit(todo.id)}
-        >
-          수정
-        </button>
-        <button
-          type="button"
-          className="h-9 rounded-md border border-[#ded7ec] bg-[#f4f1fa] px-3 text-sm font-bold text-[#4c4659] transition hover:border-[#178a55] hover:text-[#178a55]"
-          onClick={() => onToggleTodo(todo.id)}
-        >
-          {todo.isCompleted ? "취소" : "완료"}
-        </button>
-        <button
-          type="button"
-          className="h-9 rounded-md border border-[#ded7ec] bg-[#f4f1fa] px-3 text-sm font-bold text-[#4c4659] transition hover:border-[#d83a3a] hover:text-[#d83a3a]"
-          onClick={() => onDeleteTodo(todo.id)}
-        >
-          삭제
-        </button>
+        type="button"
+        className={`${btnBase} hover:border-[#672be0] hover:text-[#672be0]`}
+        onClick={() => onStartEdit(todo.id)}
+      >
+        수정
+      </button>
+      
+      <button
+        type="button"
+        className={`${btnBase} hover:border-[#178a55] hover:text-[#178a55]`}
+        onClick={() => onToggleTodo(todo.id)}
+      >
+        {todo.isCompleted ? "취소" : "완료"}
+      </button>
+      
+      <button
+        type="button"
+        className={`${btnBase} hover:border-[#d83a3a] hover:text-[#d83a3a]`}
+        onClick={() => onDeleteTodo(todo.id)}
+      >
+        삭제
+      </button>
       </div>
     </li>
   );

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import ArrowButton from "./ArrowButton";
 import {
   createDateFromKey,
   formatWeekRangeLabel,
@@ -60,25 +61,15 @@ function WeekCalendar({
   return (
     <section className="rounded-lg border border-[#ebe7f5] bg-white p-3">
       <div className="grid grid-cols-[44px_1fr_44px] items-center gap-3">
-        <button
-          type="button"
-          className="h-10 rounded-md border border-[#ded7ec] bg-[#f4f1fa] text-xl font-bold text-[#672be0] transition hover:border-[#672be0] hover:bg-[#672be0] hover:text-white"
-          aria-label="이전 주차"
-          onClick={() => onMoveWeek(-7)}
-        >
-          &#8249;
-        </button>
+        {/* 이전 버튼 */}
+        <ArrowButton direction="prev" onClick={() => onMoveWeek(-7)} />
+
         <p className="text-center text-sm font-bold text-[#4c4659]">
           {formatWeekRangeLabel(weekStartDate)}
         </p>
-        <button
-          type="button"
-          className="h-10 rounded-md border border-[#ded7ec] bg-[#f4f1fa] text-xl font-bold text-[#672be0] transition hover:border-[#672be0] hover:bg-[#672be0] hover:text-white"
-          aria-label="다음 주차"
-          onClick={() => onMoveWeek(7)}
-        >
-          &#8250;
-        </button>
+
+        {/* 다음 버튼 */}
+        <ArrowButton direction="next" onClick={() => onMoveWeek(7)} />
       </div>
 
       <div
