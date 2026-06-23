@@ -7,11 +7,17 @@ import { getTodayDateKey, isValidDateKey } from "@/lib/date";
 import { createTodoViaRoute, updateTodoViaRoute } from "@/lib/client-api";
 import type { Todo } from "@/types/todo";
 
-type TodoStandaloneFormProps = {
-  mode: "create" | "edit";
-  initialTodo?: Todo;
-  initialDate?: string;
-};
+type TodoStandaloneFormProps =
+  | {
+      mode: "create";
+      initialDate?: string;
+      initialTodo?: never;
+    }
+  | {
+      mode: "edit";
+      initialTodo: Todo;
+      initialDate?: never;
+    };
 
 export default function TodoStandaloneForm({
   mode,
@@ -51,7 +57,7 @@ export default function TodoStandaloneForm({
           isCompleted,
         });
       } else {
-        await updateTodoViaRoute(Number(initialTodo?.id), {
+        await updateTodoViaRoute(initialTodo.id, {
           text: trimmedText,
           date,
           isCompleted,

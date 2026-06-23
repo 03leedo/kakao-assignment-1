@@ -12,6 +12,7 @@ kakao-assignment-3/
 └── frontend/
     ├── app/
     ├── components/
+    ├── hooks/
     ├── lib/
     └── types/
 ```
@@ -45,7 +46,6 @@ Next.js 앱은 기본적으로 `http://localhost:3000/todos`에서 확인할 수
 
 - Todo 생성, 조회, 수정, 삭제
 - Todo 완료 / 진행 중 상태 변경
-- 인라인 수정 UI
 - `/todos/new` Todo 생성 페이지
 - `/todos/[todoId]` Todo 수정 페이지
 - 전체 / 진행 중 / 완료 필터

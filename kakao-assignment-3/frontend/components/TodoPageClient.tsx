@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import DayHeader from "@/components/DayHeader";
 import FilterTabs from "@/components/FilterTabs";
@@ -14,17 +14,16 @@ import {
   deleteTodoViaRoute,
   updateTodoViaRoute,
 } from "@/lib/client-api";
+import { usePersistentDateKey } from "@/hooks/usePersistentDateKey";
+import { addDaysToDateKey, getMondayDateKey, getTodayDateKey } from "@/lib/date";
 import {
-  addDaysToDateKey,
-  getMondayDateKey,
-  getTodayDateKey,
-  isValidDateKey,
-} from "@/lib/date";
+  createTodoQueryPath,
+  matchesCurrentServerQuery,
+  replaceTodoByQuery,
+} from "@/lib/todo-query";
 import type { Todo, TodoFilter } from "@/types/todo";
 
 const SELECTED_DATE_KEY = "next-selected-date";
-const WEEK_START_DATE_KEY = "next-week-start-date";
-const TODO_DATE_STORAGE_EVENT = "todo-date-storage";
 
 type TodoPageClientProps = {
   initialTodos: Todo[];
@@ -43,10 +42,6 @@ export default function TodoPageClient({
     SELECTED_DATE_KEY,
     todayDateKey,
   );
-  const [weekStartDate, setWeekStartDate] = usePersistentDateKey(
-    WEEK_START_DATE_KEY,
-    getMondayDateKey(selectedDate),
-  );
   const [todos, setTodos] = useState(initialTodos);
   const [todoText, setTodoText] = useState("");
   const [searchText, setSearchText] = useState(searchKeyword);
@@ -58,20 +53,21 @@ export default function TodoPageClient({
       return todo.date === selectedDate;
     });
   }, [todos, selectedDate]);
+  const weekStartDate = useMemo(() => {
+    return getMondayDateKey(selectedDate);
+  }, [selectedDate]);
 
   const syncSelectedDate = useCallback(function syncSelectedDate(nextDateKey: string) {
     setSelectedDate(nextDateKey);
-    setWeekStartDate(getMondayDateKey(nextDateKey));
-  }, [setSelectedDate, setWeekStartDate]);
+  }, [setSelectedDate]);
 
   const handleMoveDate = useCallback(function handleMoveDate(dayAmount: number) {
     syncSelectedDate(addDaysToDateKey(selectedDate, dayAmount));
   }, [selectedDate, syncSelectedDate]);
 
   const handleMoveWeek = useCallback(function handleMoveWeek(dayAmount: number) {
-    setWeekStartDate((currentWeekStartDate) => addDaysToDateKey(currentWeekStartDate, dayAmount));
     setSelectedDate((currentSelectedDate) => addDaysToDateKey(currentSelectedDate, dayAmount));
-  }, [setSelectedDate, setWeekStartDate]);
+  }, [setSelectedDate]);
 
   function handleChangeFilter(nextFilter: TodoFilter) {
     moveTodoQuery(nextFilter, searchText);
@@ -88,18 +84,7 @@ export default function TodoPageClient({
   }
 
   function moveTodoQuery(nextFilter: TodoFilter, nextSearchText: string) {
-    const params = new URLSearchParams();
-    const trimmedSearchText = nextSearchText.trim();
-
-    if (nextFilter !== "all") {
-      params.set("filter", nextFilter);
-    }
-
-    if (trimmedSearchText) {
-      params.set("search", trimmedSearchText);
-    }
-
-    router.push(params.toString() ? `/todos?${params.toString()}` : "/todos");
+    router.push(createTodoQueryPath(nextFilter, nextSearchText));
   }
 
   async function handleCreateTodo() {
@@ -134,7 +119,7 @@ export default function TodoPageClient({
 
   const handleToggleTodo = useCallback(async function handleToggleTodo(todo: Todo) {
     try {
-      const updatedTodo = await requestTodoUpdate(todo.id, {
+      const updatedTodo = await updateTodoViaRoute(todo.id, {
         isCompleted: !todo.isCompleted,
       });
       setTodos((currentTodos) => replaceTodoByQuery(currentTodos, updatedTodo, currentFilter, searchKeyword));
@@ -220,96 +205,4 @@ export default function TodoPageClient({
       />
     </main>
   );
-}
-
-async function requestTodoUpdate(
-  id: number,
-  payload: Partial<Pick<Todo, "text" | "date" | "isCompleted">>,
-): Promise<Todo> {
-  return updateTodoViaRoute(id, payload);
-}
-
-function getStoredDateKey(storageKey: string, fallbackDateKey: string): string {
-  if (typeof window === "undefined") {
-    return fallbackDateKey;
-  }
-
-  const storedDateKey = window.localStorage.getItem(storageKey);
-
-  if (!storedDateKey || !isValidDateKey(storedDateKey)) {
-    return fallbackDateKey;
-  }
-
-  return storedDateKey;
-}
-
-type PersistentDateAction = string | ((currentDateKey: string) => string);
-
-function usePersistentDateKey(
-  storageKey: string,
-  fallbackDateKey: string,
-): [string, (action: PersistentDateAction) => void] {
-  const subscribe = useCallback((onStoreChange: () => void) => {
-    window.addEventListener("storage", onStoreChange);
-    window.addEventListener(TODO_DATE_STORAGE_EVENT, onStoreChange);
-
-    return () => {
-      window.removeEventListener("storage", onStoreChange);
-      window.removeEventListener(TODO_DATE_STORAGE_EVENT, onStoreChange);
-    };
-  }, []);
-
-  const getSnapshot = useCallback(() => {
-    return getStoredDateKey(storageKey, fallbackDateKey);
-  }, [fallbackDateKey, storageKey]);
-
-  const getServerSnapshot = useCallback(() => {
-    return fallbackDateKey;
-  }, [fallbackDateKey]);
-
-  const dateKey = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-
-  const setDateKey = useCallback(
-    (action: PersistentDateAction) => {
-      const currentDateKey = getStoredDateKey(storageKey, fallbackDateKey);
-      const nextDateKey = typeof action === "function" ? action(currentDateKey) : action;
-
-      window.localStorage.setItem(storageKey, nextDateKey);
-      window.dispatchEvent(new Event(TODO_DATE_STORAGE_EVENT));
-    },
-    [fallbackDateKey, storageKey],
-  );
-
-  return [dateKey, setDateKey];
-}
-
-function matchesCurrentServerQuery(todo: Todo, currentFilter: TodoFilter, searchKeyword: string): boolean {
-  const trimmedSearchKeyword = searchKeyword.trim().toLowerCase();
-
-  if (currentFilter === "active" && todo.isCompleted) {
-    return false;
-  }
-
-  if (currentFilter === "completed" && !todo.isCompleted) {
-    return false;
-  }
-
-  if (trimmedSearchKeyword && !todo.text.toLowerCase().includes(trimmedSearchKeyword)) {
-    return false;
-  }
-
-  return true;
-}
-
-function replaceTodoByQuery(
-  currentTodos: Todo[],
-  updatedTodo: Todo,
-  currentFilter: TodoFilter,
-  searchKeyword: string,
-): Todo[] {
-  if (!matchesCurrentServerQuery(updatedTodo, currentFilter, searchKeyword)) {
-    return currentTodos.filter((todo) => todo.id !== updatedTodo.id);
-  }
-
-  return currentTodos.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo));
 }

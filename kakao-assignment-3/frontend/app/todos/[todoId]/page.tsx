@@ -1,3 +1,4 @@
+import axios from "axios";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -18,7 +19,17 @@ export default async function EditTodoPage({ params }: EditTodoPageProps) {
     notFound();
   }
 
-  const todo = await getTodo(parsedTodoId);
+  let todo;
+
+  try {
+    todo = await getTodo(parsedTodoId);
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      notFound();
+    }
+
+    throw error;
+  }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-5 px-4 py-6 sm:py-10">

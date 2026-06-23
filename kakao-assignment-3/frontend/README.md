@@ -26,5 +26,8 @@ npm.cmd run build
 - `app/api/todos`: FastAPI 프록시 Route Handler
 - `components`: Todo UI 컴포넌트
 - `lib/api.ts`: FastAPI 요청 함수
+- `lib/client-api.ts`: 브라우저에서 Next Route Handler로 보내는 요청 함수
 - `lib/date.ts`: 날짜 계산 유틸
+- `lib/todo-query.ts`: 필터, 검색 쿼리 유틸
+- `hooks/usePersistentDateKey.ts`: hydration mismatch를 피하는 날짜 저장 훅
 - `types/todo.ts`: Todo 타입 정의

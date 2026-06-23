@@ -1,6 +1,6 @@
 import { getTodos } from "@/app/actions";
 import TodoPageClient from "@/components/TodoPageClient";
-import type { TodoFilter } from "@/types/todo";
+import { parseTodoFilter } from "@/lib/todo-query";
 
 export const dynamic = "force-dynamic";
 
@@ -28,12 +28,4 @@ export default async function TodosPage({ searchParams }: TodosPageProps) {
       searchKeyword={searchKeyword}
     />
   );
-}
-
-function parseTodoFilter(filter?: string): TodoFilter {
-  if (filter === "active" || filter === "completed") {
-    return filter;
-  }
-
-  return "all";
 }
