@@ -1,59 +1,74 @@
-# React Todo
+# Kakao Assignment 3 - Next Todo
 
-Vanilla JS로 만든 Todo 앱을 React Function Component 구조로 마이그레이션한 과제입니다.
-
-## 실행 방법
-
-```bash
-npm install
-npm run dev
-```
-
-브라우저에서 `http://localhost:5173`으로 접속해 확인합니다.
-
-## 구현 기능
-
-- Todo 추가, 조회, 인라인 수정, 완료 처리, 삭제
-- 빈 입력값과 빈 수정값 안내 메시지
-- 전체 / 진행 중 / 완료 상태별 필터링
-- 선택된 날짜 기준 일간 뷰
-- 월요일부터 일요일까지 표시하는 주간 뷰
-- 이전 주차 / 다음 주차 이동
-- 날짜별 Todo 개수 표시
-- 오늘 날짜와 선택 날짜 시각적 구분
-- `localStorage`를 통한 Todo, 선택 날짜, 주간 뷰 상태 저장
-- 깨진 localStorage 데이터에 대한 예외 처리
-
-## 1차 과제와 달라진 점
-
-- Vanilla JS의 직접 DOM 조작을 React의 `useState` 기반 렌더링으로 변경했습니다.
-- Todo 목록 렌더링을 컴포넌트 단위로 분리하여 UI를 구성했다.
-- `prompt()`로 처리하던 수정 기능을 `isEditing` 상태 기반 인라인 입력 UI로 변경했습니다.
-- 추가, 수정, 삭제 함수마다 직접 저장하던 localStorage 로직을 `useEffect`로 분리했습니다.
-- 날짜 계산과 저장 로직은 `src/utils/`로 분리해 컴포넌트가 UI 역할에 집중하도록 구성했습니다.
+React(Vite)로 만들었던 Todo 앱을 Next.js App Router와 FastAPI, SQLite 구조로 마이그레이션한 프로젝트입니다.
 
 ## 폴더 구조
 
 ```text
-todo-React/
-├── src/
-│   ├── components/
-│   ├── utils/
-│   ├── hooks/
-│   │   └── useTodos.js
-│   ├── App.jsx
-│   ├── index.css
-│   └── main.jsx
-├── index.html
-├── package.json
-└── vite.config.js
+kakao-assignment-3/
+├── backend/
+│   ├── main.py
+│   └── requirements.txt
+└── frontend/
+    ├── app/
+    ├── components/
+    ├── lib/
+    └── types/
 ```
 
-## 검증 체크리스트
+## 실행 방법
 
-- [ ] 빈 입력 제출 시 안내 메시지가 표시된다
-- [ ] Todo 추가 → 수정 → 완료 → 삭제 흐름이 동작한다
-- [ ] 필터 탭을 바꿔도 선택된 필터 상태가 유지된다
-- [ ] 날짜를 이동하면 날짜별 Todo가 분리되어 표시된다
-- [ ] 새로고침 후 Todo, 선택 날짜, 주간 뷰 상태가 유지된다
-- [ ] Chrome Console에 에러가 없다
+### Backend
+
+```powershell
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+python -m pip install -r requirements.txt
+Copy-Item .env.local.example .env.local
+uvicorn main:app --reload
+```
+
+FastAPI 서버는 기본적으로 `http://127.0.0.1:8000`에서 실행됩니다.
+
+### Frontend
+
+```powershell
+cd frontend
+Copy-Item .env.local.example .env.local
+npm.cmd run dev
+```
+
+Next.js 앱은 기본적으로 `http://localhost:3000/todos`에서 확인할 수 있습니다.
+
+## 구현 기능
+
+- Todo 생성, 조회, 수정, 삭제
+- Todo 완료 / 진행 중 상태 변경
+- 인라인 수정 UI
+- `/todos/new` Todo 생성 페이지
+- `/todos/[todoId]` Todo 수정 페이지
+- 전체 / 진행 중 / 완료 필터
+- URL 파라미터 기반 서버 필터링
+- URL 파라미터 기반 서버 검색
+- 일간 뷰와 날짜 이동
+- 주간 뷰와 주차 이동
+- 날짜별 Todo 개수 표시
+- 오늘 날짜와 선택 날짜 시각적 구분
+- FastAPI CRUD API
+- SQLite 데이터 저장
+- Next.js Route Handler를 통한 FastAPI 프록시
+- 환경변수를 통한 백엔드 URL과 DB URL 분리
+
+## 검증 방법
+
+```powershell
+cd backend
+.venv\Scripts\python.exe -m py_compile main.py
+```
+
+```powershell
+cd frontend
+npm.cmd run lint
+npm.cmd run build
+```
