@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type Method } from "axios";
 
 import type { Todo, TodoCreatePayload, TodoQuery, TodoUpdatePayload } from "@/types/todo";
 
@@ -69,11 +69,16 @@ function toFastApiCreatePayload(payload: TodoCreatePayload): FastApiTodoCreatePa
   };
 }
 
-async function requestTodo<T>(path: string, init?: RequestInit): Promise<T> {
+type TodoApiRequestConfig = {
+  method?: Method;
+  data?: unknown;
+};
+
+async function requestTodo<T>(path: string, config?: TodoApiRequestConfig): Promise<T> {
   const response = await todoApi.request<T>({
     url: createApiUrl(path),
-    method: init?.method ?? "GET",
-    data: init?.body ? JSON.parse(init.body.toString()) : undefined,
+    method: config?.method ?? "GET",
+    data: config?.data,
   });
 
   if (response.status === 204) {
@@ -94,14 +99,14 @@ export async function getTodo(id: number): Promise<Todo> {
 export async function createTodo(payload: TodoCreatePayload): Promise<Todo> {
   return requestTodo<FastApiTodo>("/todos", {
     method: "POST",
-    body: JSON.stringify(toFastApiCreatePayload(payload)),
+    data: toFastApiCreatePayload(payload),
   });
 }
 
 export async function updateTodo(id: number, payload: TodoUpdatePayload): Promise<Todo> {
   return requestTodo<FastApiTodo>(`/todos/${id}`, {
     method: "PUT",
-    body: JSON.stringify(toFastApiUpdatePayload(payload)),
+    data: toFastApiUpdatePayload(payload),
   });
 }
 

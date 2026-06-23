@@ -1,10 +1,10 @@
 "use client";
 
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { getTodayDateKey, isValidDateKey } from "@/lib/date";
+import { createTodoViaRoute, updateTodoViaRoute } from "@/lib/client-api";
 import type { Todo } from "@/types/todo";
 
 type TodoStandaloneFormProps = {
@@ -45,13 +45,13 @@ export default function TodoStandaloneForm({
 
     try {
       if (mode === "create") {
-        await axios.post("/api/todos", {
+        await createTodoViaRoute({
           text: trimmedText,
           date,
           isCompleted,
         });
       } else {
-        await axios.put(`/api/todos/${initialTodo?.id}`, {
+        await updateTodoViaRoute(Number(initialTodo?.id), {
           text: trimmedText,
           date,
           isCompleted,

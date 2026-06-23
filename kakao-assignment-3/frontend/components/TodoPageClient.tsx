@@ -3,13 +3,17 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
-import axios from "axios";
 
 import DayHeader from "@/components/DayHeader";
 import FilterTabs from "@/components/FilterTabs";
 import TodoForm from "@/components/TodoForm";
 import TodoList from "@/components/TodoList";
 import WeekCalendar from "@/components/WeekCalendar";
+import {
+  createTodoViaRoute,
+  deleteTodoViaRoute,
+  updateTodoViaRoute,
+} from "@/lib/client-api";
 import {
   addDaysToDateKey,
   getMondayDateKey,
@@ -110,12 +114,11 @@ export default function TodoPageClient({
     setMessage("");
 
     try {
-      const response = await axios.post<Todo>("/api/todos", {
+      const createdTodo = await createTodoViaRoute({
         text: trimmedText,
         date: selectedDate,
       });
 
-      const createdTodo = response.data;
       if (matchesCurrentServerQuery(createdTodo, currentFilter, searchKeyword)) {
         setTodos((currentTodos) => [...currentTodos, createdTodo]);
       }
@@ -143,7 +146,7 @@ export default function TodoPageClient({
 
   const handleDeleteTodo = useCallback(async function handleDeleteTodo(id: number) {
     try {
-      await axios.delete(`/api/todos/${id}`);
+      await deleteTodoViaRoute(id);
 
       setTodos((currentTodos) => currentTodos.filter((todo) => todo.id !== id));
       setMessage("Todo가 삭제됐어요.");
@@ -223,9 +226,7 @@ async function requestTodoUpdate(
   id: number,
   payload: Partial<Pick<Todo, "text" | "date" | "isCompleted">>,
 ): Promise<Todo> {
-  const response = await axios.put<Todo>(`/api/todos/${id}`, payload);
-
-  return response.data;
+  return updateTodoViaRoute(id, payload);
 }
 
 function getStoredDateKey(storageKey: string, fallbackDateKey: string): string {
